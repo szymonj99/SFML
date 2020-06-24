@@ -1,4 +1,12 @@
-cmake_minimum_required(VERSION 3.16)
+# FOR DEVELOPMENT
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchains/DevkitA64Libnx.cmake)
+
+# CMake's built-in Android support requires 3.7.0
+if(CMAKE_SYSTEM_NAME MATCHES "Android")
+    cmake_minimum_required(VERSION 3.7.2)
+else()
+    cmake_minimum_required(VERSION 3.0.2)
+endif()
 
 # define a macro that helps defining an option
 macro(sfml_set_option var default type docstring)
@@ -152,9 +160,10 @@ if(SFML_OS_SWITCH)
     find_package(Libnx REQUIRED)
     find_package(LibOpenAL REQUIRED)
     find_package(LibOpenGL REQUIRED)
+    find_package(LibVorbis REQUIRED)
 
     set (SFML_OPENGL_ES true)
-    
+
     # this is a workaround to compile sfml-activity without the stl library as a dependency
     # we save the original compilation command line to restore it later in Macro.cmake
     set(CMAKE_CXX_CREATE_SHARED_LIBRARY_WITH_STL ${CMAKE_CXX_CREATE_SHARED_LIBRARY})
