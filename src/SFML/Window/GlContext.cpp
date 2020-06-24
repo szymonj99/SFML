@@ -94,6 +94,11 @@ using ContextType = sf::priv::EaglContext;
 
 using ContextType = sf::priv::EglContext;
 
+
+#elif defined(SFML_SYSTEM_SWITCH)
+
+    typedef sf::priv::EglContext ContextType;
+
 #endif
 
 #if defined(SFML_SYSTEM_WINDOWS)

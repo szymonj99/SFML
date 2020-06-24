@@ -45,6 +45,19 @@
 #ifndef SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
 #define SF_GLAD_EGL_IMPLEMENTATION_INCLUDED
 #define SF_GLAD_EGL_IMPLEMENTATION
+
+#if defined(SFML_SYSTEM_SWITCH)
+#include <switch.h>
+#include <EGL/egl.h>    // EGL library
+#include <EGL/eglext.h> // EGL extensions
+#include <glad/glad.h>  // glad library (OpenGL loader)
+
+static int gladLoaderLoadEGL(EGLDisplay display)
+{
+    return gladLoadGL();
+}
+
+#else
 #include <glad/egl.h>
 #endif
 

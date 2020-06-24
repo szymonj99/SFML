@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2019 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,31 +22,69 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SFML_CLIPBOARDIMPL_HPP
-#define SFML_CLIPBOARDIMPL_HPP
-
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Config.hpp>
+#include <SFML/Window/SensorImpl.hpp>
+#include <SFML/System/Time.hpp>
+#include <switch.h>
 
-#if defined(SFML_SYSTEM_WINDOWS)
-#include <SFML/Window/Win32/ClipboardImpl.hpp>
-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || \
-    defined(SFML_SYSTEM_NETBSD)
-#if defined(SFML_USE_DRM)
-#include <SFML/Window/DRM/ClipboardImpl.hpp>
-#else
-#include <SFML/Window/Unix/ClipboardImpl.hpp>
-#endif
-#elif defined(SFML_SYSTEM_MACOS)
-#include <SFML/Window/OSX/ClipboardImpl.hpp>
-#elif defined(SFML_SYSTEM_IOS)
-#include <SFML/Window/iOS/ClipboardImpl.hpp>
-#elif defined(SFML_SYSTEM_ANDROID)
-#include <SFML/Window/Android/ClipboardImpl.hpp>
-#elif defined(SFML_SYSTEM_SWITCH)
-#include <SFML/Window/Switch/ClipboardImpl.hpp>
-#endif
 
-#endif // SFML_CLIPBOARDIMPL_HPP
+namespace sf
+{
+namespace priv
+{
+////////////////////////////////////////////////////////////
+void SensorImpl::initialize()
+{
+    // TODO
+}
+
+
+////////////////////////////////////////////////////////////
+void SensorImpl::cleanup()
+{
+    // TODO
+}
+
+
+////////////////////////////////////////////////////////////
+bool SensorImpl::isAvailable(Sensor::Type sensor)
+{
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////
+bool SensorImpl::open(Sensor::Type sensor)
+{
+    // TODO
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////
+void SensorImpl::close()
+{
+    // Nothing to do
+}
+
+
+////////////////////////////////////////////////////////////
+Vector3f SensorImpl::update()
+{
+    // TODO
+    return {0.f, 0.f, 0.f};
+}
+
+
+////////////////////////////////////////////////////////////
+void SensorImpl::setEnabled(bool enabled)
+{
+    // TODO
+    
+}
+
+} // namespace priv
+
+} // namespace sf

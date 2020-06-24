@@ -63,6 +63,11 @@ using WindowHandle = void*;
 // Window handle is ANativeWindow* (void*) on Android
 using WindowHandle = void*;
 
+#elif defined(SFML_SYSTEM_SWITCH)
+
+    // Window handle is ANativeWindow* (void*) on Switch
+    typedef void* WindowHandle;
+
 #elif defined(SFML_DOXYGEN)
 
 // Define type alias symbol so that Doxygen can attach some documentation to it
