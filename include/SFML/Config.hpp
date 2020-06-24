@@ -68,6 +68,10 @@
 // MacOS
 #define SFML_SYSTEM_MACOS
 
+#elif defined(SWITCH)
+
+    #define SFML_SYSTEM_SWITCH
+
 #else
 
 // Unsupported Apple system
