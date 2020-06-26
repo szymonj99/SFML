@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2019 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -25,29 +25,20 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/System/Mutex.hpp>
-#if defined(SFML_SYSTEM_WINDOWS)
-    #include <SFML/System/Win32/MutexImpl.hpp>
-#elif defined(SFML_SYSTEM_SWITCH)
-    #include <SFML/System/Switch/MutexImpl.hpp>
-#else
-    #include <SFML/System/Unix/MutexImpl.hpp>
-#endif
+#include <switch.h>
+#include <errno.h>
+#include <time.h>
+#include <SFML/System/Time.hpp>
+
 
 namespace sf
 {
 namespace priv
 {
 ////////////////////////////////////////////////////////////
-String ClipboardImpl::getString()
+void sleepImpl(Time time)
 {
-    return "";
-}
-
-
-////////////////////////////////////////////////////////////
-void ClipboardImpl::setString(const String& /*text*/)
-{
+    svcSleepThread((s64) time.asMilliseconds() * 100);
 }
 
 } // namespace priv

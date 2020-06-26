@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2019 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,18 +22,14 @@
 //
 ////////////////////////////////////////////////////////////
 
+#ifndef SFML_MUTEXIMPL_HPP
+#define SFML_MUTEXIMPL_HPP
+
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/DRM/CursorImpl.hpp>
-
-#if defined(SFML_SYSTEM_WINDOWS)
-    #include <SFML/System/Win32/ThreadImpl.hpp>
-#elif defined(SFML_SYSTEM_SWITCH)
-    #include <SFML/System/Switch/ThreadImpl.hpp>
-#else
-    #include <SFML/System/Unix/ThreadImpl.hpp>
-#endif
+#include <SFML/System/NonCopyable.hpp>
+#include <switch.h>
 
 
 namespace sf
@@ -41,51 +37,47 @@ namespace sf
 namespace priv
 {
 ////////////////////////////////////////////////////////////
-CursorImpl::CursorImpl()
-{
-}
-
-
+/// \brief Unix implementation of mutexes
 ////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixels(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
+class MutexImpl : NonCopyable
 {
-    return false;
-}
+public:
 
+    ////////////////////////////////////////////////////////////
+    /// \brief Default constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    MutexImpl();
 
-////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixelsARGB(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
-{
-    return false;
-}
+    ////////////////////////////////////////////////////////////
+    /// \brief Destructor
+    ///
+    ////////////////////////////////////////////////////////////
+    ~MutexImpl();
 
+    ////////////////////////////////////////////////////////////
+    /// \brief Lock the mutex
+    ///
+    ////////////////////////////////////////////////////////////
+    void lock();
 
-////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixelsMonochrome(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
-{
-    return false;
-}
+    ////////////////////////////////////////////////////////////
+    /// \brief Unlock the mutex
+    ///
+    ////////////////////////////////////////////////////////////
+    void unlock();
 
+private:
 
-////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromSystem(Cursor::Type /*type*/)
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-bool CursorImpl::isColorCursorSupported()
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-void CursorImpl::release()
-{
-}
+    ////////////////////////////////////////////////////////////
+    // Member data
+    ////////////////////////////////////////////////////////////
+    Mutex m_mutex; ///< pthread handle of the mutex
+};
 
 } // namespace priv
 
 } // namespace sf
+
+
+#endif // SFML_MUTEXIMPL_HPP

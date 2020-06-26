@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2022 Laurent Gomila (laurent@sfml-dev.org)
+// Copyright (C) 2007-2019 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -25,15 +25,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/DRM/CursorImpl.hpp>
-
-#if defined(SFML_SYSTEM_WINDOWS)
-    #include <SFML/System/Win32/ThreadImpl.hpp>
-#elif defined(SFML_SYSTEM_SWITCH)
-    #include <SFML/System/Switch/ThreadImpl.hpp>
-#else
-    #include <SFML/System/Unix/ThreadImpl.hpp>
-#endif
+#include <SFML/System/Unix/ThreadImpl.hpp>
+#include <SFML/System/Thread.hpp>
+#include <iostream>
+#include <cassert>
 
 
 namespace sf
@@ -41,49 +36,57 @@ namespace sf
 namespace priv
 {
 ////////////////////////////////////////////////////////////
-CursorImpl::CursorImpl()
+ThreadImpl::ThreadImpl(Thread* owner) :
+m_isActive(true)
 {
+    m_isActive = pthread_create(&m_thread, NULL, &ThreadImpl::entryPoint, owner) == 0;
+
+    if (!m_isActive)
+        std::cerr << "Failed to create thread" << std::endl;
 }
 
 
 ////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixels(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
+void ThreadImpl::wait()
 {
-    return false;
+    if (m_isActive)
+    {
+        assert(pthread_equal(pthread_self(), m_thread) == 0); // A thread cannot wait for itself!
+        pthread_join(m_thread, NULL);
+    }
 }
 
 
 ////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixelsARGB(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
+void ThreadImpl::terminate()
 {
-    return false;
+    if (m_isActive)
+    {
+        #ifndef SFML_SYSTEM_ANDROID
+            pthread_cancel(m_thread);
+        #else
+            // See https://stackoverflow.com/questions/4610086/pthread-cancel-al
+            pthread_kill(m_thread, SIGUSR1);
+        #endif
+    }
 }
 
 
 ////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromPixelsMonochrome(const Uint8* /*pixels*/, Vector2u /*size*/, Vector2u /*hotspot*/)
+void* ThreadImpl::entryPoint(void* userData)
 {
-    return false;
-}
+    // The Thread instance is stored in the user data
+    Thread* owner = static_cast<Thread*>(userData);
 
+    #ifndef SFML_SYSTEM_ANDROID
+        // Tell the thread to handle cancel requests immediately
+        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    #endif
 
-////////////////////////////////////////////////////////////
-bool CursorImpl::loadFromSystem(Cursor::Type /*type*/)
-{
-    return false;
-}
+    // Forward to the owner
+    owner->run();
 
-
-////////////////////////////////////////////////////////////
-bool CursorImpl::isColorCursorSupported()
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
-void CursorImpl::release()
-{
+    return NULL;
 }
 
 } // namespace priv

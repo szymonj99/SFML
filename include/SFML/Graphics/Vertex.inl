@@ -24,7 +24,19 @@
 
 
 ////////////////////////////////////////////////////////////
-constexpr Vertex::Vertex() : position(0, 0), color(255, 255, 255), texCoords(0, 0)
+// Headers
+////////////////////////////////////////////////////////////
+#include <SFML/System/ThreadLocal.hpp>
+
+#if defined(SFML_SYSTEM_WINDOWS)
+    #include <SFML/System/Win32/ThreadLocalImpl.hpp>
+#elif defined(SFML_SYSTEM_SWITCH)
+    #include <SFML/System/Switch/ThreadLocalImpl.hpp>
+#else
+    #include <SFML/System/Unix/ThreadLocalImpl.hpp>
+#endif
+
+namespace sf
 {
 }
 

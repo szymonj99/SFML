@@ -26,7 +26,14 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/System/Clock.hpp>
-#include <SFML/System/Time.hpp>
+
+#if defined(SFML_SYSTEM_WINDOWS)
+    #include <SFML/System/Win32/ClockImpl.hpp>
+#elif defined(SFML_SYSTEM_SWITCH)
+    #include <SFML/System/Switch/ClockImpl.hpp>
+#else
+    #include <SFML/System/Unix/ClockImpl.hpp>
+#endif
 
 
 namespace sf
