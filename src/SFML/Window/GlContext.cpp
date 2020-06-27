@@ -485,17 +485,16 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
     using GlContextImpl::mutex;
     using GlContextImpl::resourceCount;
     using GlContextImpl::sharedContext;
-
     // Make sure that there's an active context (context creation may need extensions, and thus a valid context)
-    assert(sharedContext != nullptr);
-
-    std::scoped_lock lock(mutex);
+    assert(sharedContext != NULL);
+    Lock lock(mutex);
 
     // If resourceCount is 1 we know that we are inside sf::Context or sf::Window
     // Only in this situation we allow the user to indirectly re-create the shared context as a core context
 
     // Check if we need to convert our shared context into a core context
-    if ((resourceCount == 1) && (settings.attributeFlags & ContextSettings::Core) &&
+    if ((resourceCount == 1) &&
+        (settings.attributeFlags & ContextSettings::Core) &&
         !(sharedContext->m_settings.attributeFlags & ContextSettings::Core))
     {
         // Re-create our shared context as a core context

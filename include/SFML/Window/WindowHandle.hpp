@@ -69,7 +69,7 @@ using WindowHandle = void*;
 
 #elif defined(SFML_SYSTEM_SWITCH)
     // Window handle is ANativeWindow* (void*) on Switch
-    typedef ViDisplay* WindowHandle;
+    typedef NWindow* WindowHandle;
 
 #elif defined(SFML_DOXYGEN)
 

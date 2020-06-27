@@ -73,19 +73,21 @@ EGLDisplay getInitializedDisplay()
     // On Android, its native activity handles this for us
     sf::priv::ActivityStates& states = sf::priv::getActivity();
     std::scoped_lock          lock(states.mutex);
-
-    return states.display;
-
-#endif
+    return states->display;
+#else
 
     static EGLDisplay display = EGL_NO_DISPLAY;
 
-    if (display == EGL_NO_DISPLAY)
-    {
-        eglCheck(display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
-        eglCheck(eglInitialize(display, nullptr, nullptr));
-    }
+        if (display == EGL_NO_DISPLAY)
+        {
+            eglCheck(display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
+            eglCheck(eglInitialize(display, NULL, NULL));
+            eglCheck(eglBindAPI(EGL_OPENGL_API));
+        }
 
+        return display;
+    }
+#endif
     return display;
 }
 
@@ -121,8 +123,7 @@ m_context(EGL_NO_CONTEXT),
 m_surface(EGL_NO_SURFACE),
 m_config(nullptr)
 {
-    EglContextImpl::ensureInit();
-
+    ensureInit();
     // Get the initialized EGL display
     m_display = EglContextImpl::getInitializedDisplay();
 
@@ -132,8 +133,11 @@ m_config(nullptr)
 
     // Note: The EGL specs say that attrib_list can be a null pointer when passed to eglCreatePbufferSurface,
     // but this is resulting in a segfault. Bug in Android?
-    EGLint attrib_list[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-
+    EGLint attrib_list[] = {
+        EGL_WIDTH, 1,
+        EGL_HEIGHT,1,
+        EGL_NONE
+    };
     eglCheck(m_surface = eglCreatePbufferSurface(m_display, m_config, attrib_list));
 
     // Create EGL context
@@ -162,10 +166,8 @@ m_config(nullptr)
     states.context = this;
 
 #endif
-
     // Get the initialized EGL display
-    m_display = EglContextImpl::getInitializedDisplay();
-
+    m_display = getInitializedDisplay();
     // Get the best EGL config matching the requested video settings
     m_config = getBestConfig(m_display, bitsPerPixel, settings);
     updateSettings();
@@ -173,7 +175,10 @@ m_config(nullptr)
     // Create EGL context
     createContext(shared);
 
-#if !defined(SFML_SYSTEM_ANDROID)
+#if defined(SFML_SYSTEM_SWITCH)
+    createSurface(nwindowGetDefault());
+
+#elif !defined(SFML_SYSTEM_ANDROID)
     // Create EGL surface (except on Android because the window is created
     // asynchronously, its activity manager will call it for us)
     createSurface(owner.getSystemHandle());
@@ -282,7 +287,6 @@ void EglContext::createContext(EglContext* shared)
         toShared = shared->m_context;
     else
         toShared = EGL_NO_CONTEXT;
-
     if (toShared != EGL_NO_CONTEXT)
         eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
@@ -315,22 +319,29 @@ EGLConfig EglContext::getBestConfig(EGLDisplay display, unsigned int bitsPerPixe
     EglContextImpl::ensureInit();
 
     // Set our video settings constraint
-    const EGLint attributes[] =
-        {EGL_BUFFER_SIZE,
-         static_cast<EGLint>(bitsPerPixel),
-         EGL_DEPTH_SIZE,
-         static_cast<EGLint>(settings.depthBits),
-         EGL_STENCIL_SIZE,
-         static_cast<EGLint>(settings.stencilBits),
-         EGL_SAMPLE_BUFFERS,
-         settings.antialiasingLevel ? 1 : 0,
-         EGL_SAMPLES,
-         static_cast<EGLint>(settings.antialiasingLevel),
-         EGL_SURFACE_TYPE,
-         EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-         EGL_RENDERABLE_TYPE,
-         EGL_OPENGL_ES_BIT,
-         EGL_NONE};
+#ifdef SFML_SYSTEM_SWITCH
+    const EGLint attributes[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_RED_SIZE,     8,
+        EGL_GREEN_SIZE,   8,
+        EGL_BLUE_SIZE,    8,
+        EGL_ALPHA_SIZE,   8,
+        EGL_DEPTH_SIZE,   24,
+        EGL_STENCIL_SIZE, 8,
+        EGL_NONE
+    };
+#else
+    const EGLint attributes[] = {
+        EGL_BUFFER_SIZE, static_cast<EGLint>(bitsPerPixel),
+        EGL_DEPTH_SIZE, static_cast<EGLint>(settings.depthBits),
+        EGL_STENCIL_SIZE, static_cast<EGLint>(settings.stencilBits),
+        EGL_SAMPLE_BUFFERS, static_cast<EGLint>(settings.antialiasingLevel ? 1 : 0),
+        EGL_SAMPLES, static_cast<EGLint>(settings.antialiasingLevel),
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+        EGL_NONE
+    };
+#endif
 
     EGLint    configCount;
     EGLConfig configs[1];

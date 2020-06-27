@@ -31,6 +31,8 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
+#include <switch.h>
+
 
 namespace sf
 {
