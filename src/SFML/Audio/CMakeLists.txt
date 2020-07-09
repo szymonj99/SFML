@@ -65,6 +65,8 @@ elseif(SFML_OS_MACOSX)
 elseif(SFML_OS_ANDROID)
     list(APPEND CMAKE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/extlibs/headers/AL")
     list(APPEND CMAKE_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/extlibs/android")
+elseif(SFML_OS_SWITCH)
+    include_directories("${PROJECT_SOURCE_DIR}/extlibs/headers/AL")
 endif()
 
 # find external libraries
